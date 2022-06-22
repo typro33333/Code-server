@@ -1,0 +1,59 @@
+version: "2.1"
+
+x-code-server-common: &code-server
+  image: lscr.io/linuxserver/code-server:latest
+  restart: unless-stopped
+
+services:
+  code-server-1:
+    <<: *code-server
+    container_name: code-server
+    environment:
+      - PUID=1000
+      - PGID=100
+      - TZ=Asia/Kolkata # Can change to london/euro
+      - PASSWORD=${PASSWORD}
+      # - HASHED_PASSWORD= #optional
+      - SUDO_PASSWORD=${SUDO_PASSWORD}
+      # - SUDO_PASSWORD_HASH= #optional
+      # - PROXY_DOMAIN=code-server.my.domain #optional
+      # - DEFAULT_WORKSPACE=/config/workspace #optional
+    volumes:
+      - code-data-1:/config
+    ports:
+      - ${PORT_EXPORT_CODE_SERVER}:8443
+    # Can accept by domain + port = app
+      - ${PORT_EXPORT_APP_1}:3000 #dev reactjs or nextjs often use this port
+    env_file:
+      - .env
+
+  # If you want have another code-server
+  # code-server-2:
+  #   <<: *code-server
+  #   container_name: code-server
+  #   environment:
+  #     - PUID=2000
+  #     - PGID=200
+  #     - TZ=Asia/Kolkata # Can change to london/euro
+  #     - PASSWORD=${PASSWORD}
+  #     # - HASHED_PASSWORD= #optional
+  #     - SUDO_PASSWORD=${SUDO_PASSWORD}
+  #     # - SUDO_PASSWORD_HASH= #optional
+  #     # - PROXY_DOMAIN=code-server.my.domain #optional
+  #     # - DEFAULT_WORKSPACE=/config/workspace #optional
+  #   volumes:
+  #     - code-data-1:/config
+  #   ports:
+  #     - ${PORT_EXPORT_CODE_SERVER}:8443
+  #   # Can accept by domain + port = app
+  #     - ${PORT_EXPORT_APP_1}:3000 #dev reactjs or nextjs often use this port
+  #   env_file:
+  #     - .env
+
+volumes:
+  code-data-1:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${CODE_DATA}
